@@ -1,0 +1,8 @@
+C:\Users\ict01>d: -> 영어d:이라고 쓰면 c드라이브에서 d드라이브로 바뀐다.
+
+D:\>cd D:\KIM.JH\javastudy\day01 -> 드라이브D에서 KIM.J.H라는 폴더로 이동한다
+
+D:\KIM.JH\javastudy\day01>javac Ex04.java -> 컴퓨터의 언어로 컴파일러(번역) 한다 (javac) (예시-1010100100)
+
+D:\KIM.JH\javastudy\day01>java Ex04 -> Ex04의 내용을 출력해주세요
+ Hello java -> 원하는 값이 나옴
