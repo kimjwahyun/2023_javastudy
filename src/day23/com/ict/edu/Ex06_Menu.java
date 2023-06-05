@@ -2,8 +2,16 @@ package day23.com.ict.edu;
 
 import java.awt.FileDialog;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -18,25 +26,26 @@ import javax.swing.ScrollPaneConstants;
 // 메뉴바에 메뉴를 붙인다. 메뉴에 메뉴아이템을 붙인다.
 // 메뉴아이템 -> 메뉴 -> 메뉴바 -> 프레임
 // 메뉴바는 프레임에 붙인다.(setJMenuBar)
-public class Ex06_Menu extends JFrame{
+public class Ex06_Menu extends JFrame {
 	JTextArea jta;
 	JScrollPane jsp;
 	JMenuBar jmb;
 	JMenu m_file, m_form, font_from, m_help;
 	JMenuItem i_newFile, i_openFile, i_saveFile, i_exitFile, i_item1, i_item2, i_item3, i_help, i_info;
+
 	public Ex06_Menu() {
 		super("간단메모장");
 		jta = new JTextArea();
 		jsp = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		
+
 		// 메뉴바, 메뉴, 메뉴 아이템 순으로 생성
 		jmb = new JMenuBar();
 		m_file = new JMenu(" 파 일 ");
 		m_form = new JMenu(" 서 식 ");
 		font_from = new JMenu(" 글자서식 ");
 		m_help = new JMenu(" 도 움 말 ");
-		
+
 		i_newFile = new JMenuItem(" 새파일 ");
 		i_openFile = new JMenuItem(" 열 기 ...");
 		i_saveFile = new JMenuItem(" 저 장 ...");
@@ -45,8 +54,8 @@ public class Ex06_Menu extends JFrame{
 		i_item2 = new JMenuItem(" 궁 서, 굵 게, 40 ");
 		i_item3 = new JMenuItem(" 굴 림, 기 본, 20 ");
 		i_help = new JMenuItem(" 도 움 말 ");
-		i_info= new JMenuItem(" 메모장 정보 ");
-		
+		i_info = new JMenuItem(" 메모장 정보 ");
+
 		// 아이템을 메뉴에 붙이자.
 		m_file.add(i_newFile);
 		m_file.add(i_openFile);
@@ -54,21 +63,20 @@ public class Ex06_Menu extends JFrame{
 		m_file.add(i_saveFile);
 		m_file.addSeparator();
 		m_file.add(i_exitFile);
-		
+
 		m_form.add(font_from);
 		font_from.add(i_item1);
 		font_from.add(i_item2);
 		font_from.add(i_item3);
-		
+
 		m_help.add(i_help);
 		m_help.add(i_info);
-		
-		
+
 		// 메뉴를 메뉴바에 붙이자.
 		jmb.add(m_file);
 		jmb.add(m_form);
 		jmb.add(m_help);
-		
+
 		// 메뉴바를 프레임에 붙인다.
 		setJMenuBar(jmb);
 		add(jsp);
@@ -76,23 +84,23 @@ public class Ex06_Menu extends JFrame{
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setVisible(true);
-		
+
 		// 새파일
 		i_newFile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// 메모장안에 글자 존재 여부 판단.
 				int size = jta.getText().length();
-				if(size == 0) {
+				if (size == 0) {
 					jta.setText("");
-				}else {
-					int res = JOptionPane.showOptionDialog(getParent(), "변경 내용을 제목 없음에 저장하시겠습니까?",
-							"간단 메모장", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
-					if(res == 0) {
+				} else {
+					int res = JOptionPane.showOptionDialog(getParent(), "변경 내용을 제목 없음에 저장하시겠습니까?", "간단 메모장",
+							JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+					if (res == 0) {
 						// 실제 저장하는 코드
-					}else if (res == 1) {
+					} else if (res == 1) {
 						jta.setText("");
-					}else if (res == 2) {
+					} else if (res == 2) {
 						return;
 					}
 				}
@@ -102,22 +110,73 @@ public class Ex06_Menu extends JFrame{
 		i_openFile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//파일 열기 다이얼 로그
-				FileDialog fd = new FileDialog((JFrame)getParent(),"불러오기", FileDialog.LOAD);
+				// 파일 열기 다이얼 로그
+				FileDialog fd = new FileDialog((JFrame) getParent(), "불러오기", FileDialog.LOAD);
 				fd.setVisible(true);
 				// 실제 불러오는 코딩( I/O )
+				String pathname = fd.getDirectory() + fd.getFile();
+				File file = new File(pathname); // 자바에서 파일 형태를 쓸라고 파일이라는 걸 생성
+				FileInputStream fis = null;
+				BufferedInputStream bis = null;
+				try {
+					fis = new FileInputStream(file);
+					bis = new BufferedInputStream(fis);
+
+					byte[] b = new byte[(int) file.length()];
+					bis.read(b); // 가져온 파일을 읽겠다
+					String msg = new String(b);
+					// input으로 가져온 데이터 출력부.
+					System.out.println(msg);
+					jta.append(msg);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				} finally {
+					try {
+						bis.close();
+						fis.close();
+					} catch (Exception e3) {
+						// TODO: handle exception
+					}
+				}
 			}
 		});
 		// 저장
 		i_saveFile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//파일 저장 다이얼 로그
-				FileDialog fd = new FileDialog((JFrame)getParent(),"저장하기", FileDialog.SAVE);
+				// 파일 저장 다이얼 로그
+				FileDialog fd = new FileDialog((JFrame) getParent(), "저장하기", FileDialog.SAVE);
 				fd.setVisible(true);
 				// 실제 저장하는 코딩( I/O )
-			}
-		});
+				
+					
+						String pathname = fd.getDirectory() + fd.getFile();
+						String msg = jta.getText().trim(); // trim()은 앞뒤 공백 제거
+						// System.out.println(msg);
+						if (msg.length() > 0) {
+							File file = new File(pathname);
+							FileOutputStream fos = null;
+							BufferedOutputStream bos = null;
+							try {
+								fos = new FileOutputStream(file);
+								bos = new BufferedOutputStream(fos);
+								
+								bos.write(msg.getBytes());
+								bos.flush();
+							} catch (Exception e2) {
+							} finally {
+								try {
+									bos.close();
+									fos.close();
+								} catch (Exception e2) {
+									// TODO: handle exception
+								}
+							}
+						}
+
+					}
+				});
+
 		i_exitFile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -126,7 +185,7 @@ public class Ex06_Menu extends JFrame{
 				// 내용이 변경되지 않으면 그냥 종료
 			}
 		});
-		
+
 		i_item1.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -167,15 +226,8 @@ public class Ex06_Menu extends JFrame{
 			}
 		});
 	}
+
 	public static void main(String[] args) {
 		new Ex06_Menu();
 	}
 }
-
-
-
-
-
-
-
-
