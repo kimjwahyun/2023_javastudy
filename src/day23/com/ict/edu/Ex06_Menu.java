@@ -9,9 +9,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -32,12 +37,15 @@ public class Ex06_Menu extends JFrame {
 	JMenuBar jmb;
 	JMenu m_file, m_form, font_from, m_help;
 	JMenuItem i_newFile, i_openFile, i_saveFile, i_exitFile, i_item1, i_item2, i_item3, i_help, i_info;
+	String deff;
+	String openpath;
 
 	public Ex06_Menu() {
 		super("간단메모장");
 		jta = new JTextArea();
 		jsp = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		jta.setLineWrap(true);
 
 		// 메뉴바, 메뉴, 메뉴 아이템 순으로 생성
 		jmb = new JMenuBar();
@@ -114,32 +122,33 @@ public class Ex06_Menu extends JFrame {
 				FileDialog fd = new FileDialog((JFrame) getParent(), "불러오기", FileDialog.LOAD);
 				fd.setVisible(true);
 				// 실제 불러오는 코딩( I/O )
-				String pathname = fd.getDirectory() + fd.getFile();
-				File file = new File(pathname); // 자바에서 파일 형태를 쓸라고 파일이라는 걸 생성
-				FileInputStream fis = null;
-				BufferedInputStream bis = null;
-				try {
-					fis = new FileInputStream(file);
-					bis = new BufferedInputStream(fis);
-
-					byte[] b = new byte[(int) file.length()];
-					bis.read(b); // 가져온 파일을 읽겠다
-					String msg = new String(b);
-					// input으로 가져온 데이터 출력부.
-					System.out.println(msg);
-					jta.append(msg);
-				} catch (Exception e2) {
-					e2.printStackTrace();
-				} finally {
+				openpath = fd.getDirectory() + fd.getFile();
+				// System.out.println(openpath);
+				if (!openpath.equals("nullnull")) {
+					jta.setText(""); // 열기를 눌러 불러오기를 할 때마다 초기화
+					File file = new File(openpath);
+					FileReader fr = null;
+					BufferedReader br = null;
 					try {
-						bis.close();
-						fis.close();
-					} catch (Exception e3) {
-						// TODO: handle exception
+						fr = new FileReader(file);
+						br = new BufferedReader(fr);
+						String str = null;
+						while ((str = br.readLine()) != null) {
+							jta.append(str + "\n");
+						}
+						deff = jta.getText();
+					} catch (Exception e1) {
+					} finally {
+						try {
+							br.close();
+							fr.close();
+						} catch (Exception e2) {
+						}
 					}
 				}
 			}
 		});
+
 		// 저장
 		i_saveFile.addActionListener(new ActionListener() {
 			@Override
@@ -148,41 +157,67 @@ public class Ex06_Menu extends JFrame {
 				FileDialog fd = new FileDialog((JFrame) getParent(), "저장하기", FileDialog.SAVE);
 				fd.setVisible(true);
 				// 실제 저장하는 코딩( I/O )
-				
-					
-						String pathname = fd.getDirectory() + fd.getFile();
-						String msg = jta.getText().trim(); // trim()은 앞뒤 공백 제거
-						// System.out.println(msg);
-						if (msg.length() > 0) {
-							File file = new File(pathname);
-							FileOutputStream fos = null;
-							BufferedOutputStream bos = null;
-							try {
-								fos = new FileOutputStream(file);
-								bos = new BufferedOutputStream(fos);
-								
-								bos.write(msg.getBytes());
-								bos.flush();
-							} catch (Exception e2) {
-							} finally {
-								try {
-									bos.close();
-									fos.close();
-								} catch (Exception e2) {
-									// TODO: handle exception
-								}
-							}
+				String msg = fd.getDirectory() + fd.getFile();
+				if (!msg.equals("nullnull")) {
+					File file = new File(msg);
+					FileWriter fw = null;
+					BufferedWriter bw = null;
+					try {
+						fw = new FileWriter(file);
+						bw = new BufferedWriter(fw);
+						String str = jta.getText();
+						bw.write(str);
+						bw.flush();
+					} catch (Exception e2) {
+					} finally {
+						try {
+							bw.close();
+							fw.close();
+						} catch (Exception e3) {
 						}
-
 					}
-				});
+				}
+			}
+		});
 
 		i_exitFile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-				// 원래는 내용이 변경되면 저장할지를 물어보고
-				// 내용이 변경되지 않으면 그냥 종료
+				if (deff.equals(jta.getText())) {
+					System.exit(0);
+					// 원래는 내용이 변경되면 저장할지를 물어보고
+					// 내용이 변경되지 않으면 그냥 종료
+				} else {
+					// 다시 저장 다이알로그
+					// 저장, 저장안함, 취소
+					int res = JOptionPane.showOptionDialog(getParent(), "변경내용을 저장하시겠습니까?", "간단 메모장",
+							JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+					if (res == 0) {
+						File file = new File(openpath);
+						FileWriter fw = null;
+						BufferedWriter bw = null;
+						try {
+							fw = new FileWriter(file);
+							bw = new BufferedWriter(fw);
+							String str = jta.getText();
+							bw.write(str);
+							bw.flush();
+							System.exit(0);
+						} catch (Exception e2) {
+						} finally {
+							try {
+								bw.close();
+								fw.close();
+							} catch (Exception e3) {
+							}
+						}
+
+					} else if (res == 1) {
+						System.exit(0);
+					} else {
+
+					}
+				}
 			}
 		});
 
