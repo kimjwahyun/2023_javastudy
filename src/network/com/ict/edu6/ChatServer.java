@@ -9,17 +9,17 @@ public class ChatServer {
 	ArrayList<CopyClient> list = null;
 	
 	public ChatServer() {
-		list = new ArrayList<>();
-		try {
-			ss = new ServerSocket(7778);
-			System.out.println("서버 대기중 ...");
-			
-			exec();
+	    list = new ArrayList<>();
+	    try {
+	    	ss = new ServerSocket(7778);
+	    	System.out.println("서버 대기중 ...");
+	    	
+	    	exec();
 		} catch (Exception e) {
 		}
 	}
 	private void exec() {
-		while (true) {
+		while(true) {
 			try {
 				Socket s = ss.accept();
 				CopyClient cc = new CopyClient(s, this);

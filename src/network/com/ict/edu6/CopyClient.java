@@ -5,9 +5,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class CopyClient extends Thread{
-	Socket s;
+	Socket s ;
 	ChatServer server;
-	// 객체 직렬화
+	// 객체 직렬화 
 	ObjectInputStream in;
 	ObjectOutputStream out;
 	String nickName;
@@ -39,14 +39,15 @@ public class CopyClient extends Thread{
 						p.setCmd(2);
 						p.setMsg(nickName+"님 입장");
 						
-						// 접속자 모두에게 전달
+						// 접속자 모두에게 전달 
 						server.sendMsg(p);
 						break;
 						
 					case 2: // 메세지 일반채팅
-						p.setMsg(nickName+":"+p.getMsg());  
+						p.setCmd(2);
+						p.setMsg(nickName +":"+p.getMsg());
 						server.sendMsg(p);
-						break;	
+						break;
 					}
 				}
 			} catch (Exception e) {
@@ -60,10 +61,11 @@ public class CopyClient extends Thread{
 			server.removeClient(this);
 			Protocol p2 = new Protocol();
 			p2.setCmd(2);
-			p2.setMsg(nickName+"님 퇴장");
+			p2.setMsg(nickName + "님 퇴장");
 			server.sendMsg(p2);
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 	}
 }
+
